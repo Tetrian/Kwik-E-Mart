@@ -1,0 +1,41 @@
+services:
+  # postgres
+  database:
+    container_name: database
+    image: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-root}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-bank}
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-U", "${POSTGRES_USER:-root}", "-d", "${POSTGRES_PASSWORD:-password}"]
+      interval: 30s
+      timeout: 20s
+      retries: 5
+    networks:
+      - server
+    restart: unless-stopped
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: email@mail.com
+      PGADMIN_DEFAULT_PASSWORD: password
+      PGADMIN_LISTEN_PORT: 80
+    ports:
+      - 5050:80
+    networks:
+      - server
+    volumes:
+      - ./config/servers.json:/pgadmin4/servers.json
+      - pgadmin:/var/lib/pgadmin
+
+volumes:
+  database:
+  pgadmin:
+
+networks:
+  server:
+    driver: bridge
