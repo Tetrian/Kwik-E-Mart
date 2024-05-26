@@ -1,16 +1,16 @@
-### Kwik-E-Mart
+# Kwik-E-Mart
 Progetto client-server per Laboratorio di Sistemi Operativi 2024
 
 ## Uso [TODO]
-# Server
-# Client
+### Server
+### Client
 
 ## Dipendenze
-# Server
+### Server
 make
 docker-compose
 postgresql
 libq-dev
 pkg-config
 
-# Client [TODO]
+### Client [TODO]
