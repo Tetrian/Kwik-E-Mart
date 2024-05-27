@@ -82,7 +82,6 @@ server_t *init_server(unsigned int port, const char *db_conn_info,
   (void)db_conn_info;
 
   // Initialization of the variables for the clients connection
-  s->max_clients = max_clients;
   if ((s->queue = init_queue()) == NULL) {
     log_error("[%s] (%s) Failed to allocate enough space for the "
               "server->clients! Cause: %s\n",
@@ -110,6 +109,7 @@ server_t *init_server(unsigned int port, const char *db_conn_info,
     return NULL;
   }
 
+  s->max_workers = max_workers;
   for (size_t i = 0; i < max_workers; i++) {
     if (pthread_create(&(s->workers[i]), NULL, routine, (void *)s) != 0) {
       log_error("[%s] (%s) Failed to spawn thread n° %zu! Cause: %s\n",
@@ -138,10 +138,11 @@ void destroy_server(server_t *s) {
   if (s->workers != NULL) {
     log_info("[%s] (%s) Destroying server->pool\n", __FILE_NAME__, __func__);
 
-    //TODO: free any blocked threads
+    // free any blocked threads
+    wake_all(s->queue);
 
     log_info("[%s] (%s) Waiting the threads\n", __FILE_NAME__, __func__);
-    for (size_t i = 0; i < s->max_clients; i++) {
+    for (size_t i = 0; i < s->max_workers; i++) {
       if (pthread_join(s->workers[i], NULL) != 0)
         log_error("[%s] (%s) Failed to join thread n° %zu! Cause: %s\n",
                   __FILE_NAME__, __func__, i + 1, strerror(errno));

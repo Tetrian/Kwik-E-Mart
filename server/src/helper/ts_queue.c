@@ -1,6 +1,7 @@
 
 #include <arpa/inet.h>
 #include <pthread.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -34,6 +35,7 @@ ts_queue_t *init_queue() {
   }
 
   tsq->head = tsq->tail = NULL;
+  tsq->keep = true;
   tsq->size = 0;
 
   return tsq;
@@ -76,8 +78,12 @@ void enqueue(ts_queue_t *tsq, void *val) {
 void *dequeue(ts_queue_t *tsq) {
   pthread_mutex_lock(&(tsq->mx));
   
-  while (tsq->size == 0)
+  while (tsq->size == 0 && tsq->keep)
     pthread_cond_wait(&(tsq->cv), &(tsq->mx));
+  if (!tsq->keep) {
+    pthread_mutex_unlock(&(tsq->mx));
+    return NULL;
+  }
 
   void *val = tsq->head->value;
 
@@ -94,4 +100,11 @@ void *dequeue(ts_queue_t *tsq) {
   pthread_mutex_unlock(&(tsq->mx));
 
   return val;
+}
+
+void wake_all(ts_queue_t *tsq) {
+  pthread_mutex_lock(&(tsq->mx));
+  tsq->keep = false;
+  pthread_cond_broadcast(&(tsq->cv));
+  pthread_mutex_unlock(&(tsq->mx));
 }

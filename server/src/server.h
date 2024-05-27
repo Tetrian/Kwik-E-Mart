@@ -16,7 +16,7 @@ typedef struct server_t {
 	//TODO: add database connection
 	pthread_t *workers;
 	ts_queue_t *queue;
-	size_t max_clients;
+	size_t max_workers;
 } server_t;
 
 // Basic structures for server management

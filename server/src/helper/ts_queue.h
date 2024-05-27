@@ -3,6 +3,7 @@
 
 #include <pthread.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <sys/types.h>
 
 /* ************************************************************************** */
@@ -21,6 +22,7 @@ typedef struct ts_queue_t {
   node_t *tail;
 
   size_t size;
+  bool keep;
 } ts_queue_t;
 
 /* ************************************************************************** */
@@ -32,6 +34,9 @@ void destroy_queue(ts_queue_t *);
 void enqueue(ts_queue_t *, void *);
 
 void *dequeue(ts_queue_t *);
+
+// wake all operation in enqueue
+void wake_all(ts_queue_t *);
 
 /* ************************************************************************** */
 
