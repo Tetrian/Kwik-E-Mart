@@ -1,0 +1,16 @@
+#:kivy 2.3.0
+
+<OutsideScreen>:
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: '../res/screenbg/outside.png'
+    AnchorLayout:
+        anchor_x: 'center'
+        anchor_y: 'bottom'
+        Label:
+            id: lbl
+            text: 'Attendi per poter entrare nel negozio.'
+            font_size: 30
+            size_hint: None, None

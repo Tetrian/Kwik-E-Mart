@@ -56,6 +56,11 @@ Mkfile.old
 dkms.conf
 
 server/bin/
+
+### Python ###
+*.pyc
+
+### Editor ###
 .vscode/
 
 # End of https://www.toptal.com/developers/gitignore/api/c
