@@ -15,7 +15,7 @@
 // number of customers that can making purchases
 #define MAX_CUSTOMERS 10
 
-// number of cashiers
+// number of cashiers TODO: da gestire
 #define MAX_CASHIER 3
 
 #define DB_CONN_INFO                                                           \
@@ -23,7 +23,7 @@
   "connect_timeout=10"
 
 int main() {
-  server_t *s = init_server(PORT, DB_CONN_INFO, MAX_CUSTOMERS, MAX_CASHIER,
+  server_t *s = init_server(PORT, DB_CONN_INFO, MAX_CUSTOMERS, MAX_CUSTOMERS,
                             connection_handler);
   server_loop(s);
   destroy_server(s);
