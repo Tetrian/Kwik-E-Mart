@@ -14,13 +14,14 @@ typedef struct server_t {
 	ssize_t socket;
 	struct sockaddr_in transport;
 	//TODO: add database connection
+	//TODO: add checkouts pool
 	pthread_t *workers;
 	ts_queue_t *queue;
 	size_t max_workers;
 } server_t;
 
 // Basic structures for server management
-server_t* init_server(unsigned int, const char*, const size_t, const size_t, void *(*) (void *));
+server_t* init_server(unsigned int, const char*, const size_t, const size_t, const size_t, void *(*) (void *));
 void destroy_server(server_t*);
 void server_loop(server_t*);
 

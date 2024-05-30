@@ -21,7 +21,7 @@ static void handle_interrupt(int signal);
 
 server_t *init_server(unsigned int port, const char *db_conn_info,
                       const size_t max_clients, const size_t max_workers,
-                      void *(*routine)(void *)) {
+                      const size_t max_connections,void *(*routine)(void *)) {
   server_t *s = malloc(sizeof(struct server_t));
   if (s == NULL) {
     log_error("[%s] (%s) Failed to allocate space for the server\n",
@@ -80,6 +80,10 @@ server_t *init_server(unsigned int port, const char *db_conn_info,
 
   //TODO: Initialization of the database
   (void)db_conn_info;
+  
+  //TODO: Initialization of the supermarket checkouts
+  //NOTE: U can use max_connection for the db_pool too
+  (void)max_connections;
 
   // Initialization of the variables for the clients connection
   if ((s->queue = init_queue()) == NULL) {
@@ -186,6 +190,8 @@ void server_loop(server_t *s) {
 void *connection_handler(void *sd) {
   // Parsing del socket descriptor
   ssize_t socket = (ssize_t)dequeue(((server_t *)sd)->queue);
+  if (!is_keep(((server_t *)sd)->queue)) return NULL;
+
   log_info(
       "[%s] (%s) Start communication with the client on socket n°%d.\n",
       __FILE_NAME__, __func__, socket);

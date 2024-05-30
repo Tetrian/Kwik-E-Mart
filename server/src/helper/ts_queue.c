@@ -80,7 +80,7 @@ void *dequeue(ts_queue_t *tsq) {
   
   while (tsq->size == 0 && tsq->keep)
     pthread_cond_wait(&(tsq->cv), &(tsq->mx));
-  if (!tsq->keep) {
+  if (tsq->size == 0) {
     pthread_mutex_unlock(&(tsq->mx));
     return NULL;
   }
@@ -107,4 +107,11 @@ void wake_all(ts_queue_t *tsq) {
   tsq->keep = false;
   pthread_cond_broadcast(&(tsq->cv));
   pthread_mutex_unlock(&(tsq->mx));
+}
+
+bool is_keep(ts_queue_t *tsq) {
+  pthread_mutex_lock(&(tsq->mx));
+  bool value = tsq->keep;
+  pthread_mutex_unlock(&(tsq->mx));
+  return value;
 }

@@ -38,6 +38,8 @@ void *dequeue(ts_queue_t *);
 // wake all operation in enqueue
 void wake_all(ts_queue_t *);
 
+bool is_keep(ts_queue_t *);
+
 /* ************************************************************************** */
 
 #endif
