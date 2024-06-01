@@ -27,17 +27,17 @@
 
 /* ************************************************************************** */
 
-ssize_t write_msg(int, const u_int8_t, const char *);
+ssize_t write_msg(int, const uint8_t, const char *);
 
-ssize_t read_msg(int, const u_int8_t, char *);
+ssize_t read_msg(int, const uint8_t, char *);
 
 /* ************************************************************************** */
 
-void create_payload(u_int8_t *, u_int8_t, const char *);
+size_t create_payload(uint8_t *, uint8_t, const char *);
 
-void parse_payload(u_int8_t *, char *, const size_t);
+void parse_payload(const uint8_t *, char *, const size_t);
 
-bool is_valid(u_int8_t *, const u_int8_t, const size_t);
+bool is_valid(const uint8_t *, const uint8_t, const size_t);
 
 /* ************************************************************************** */
 
