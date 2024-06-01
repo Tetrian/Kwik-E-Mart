@@ -1,5 +1,5 @@
 # Kwik-E-Mart
-Progetto client-server per Laboratorio di Sistemi Operativi 2024\
+Progetto client-server per Laboratorio di Sistemi Operativi 2024
 ## Uso [TODO]
 ### Server
 ### Client
@@ -9,6 +9,6 @@ make\
 docker-compose\
 postgresql\
 libq-dev\
-pkg-config\
+pkg-config
 ### Client
 Kivy

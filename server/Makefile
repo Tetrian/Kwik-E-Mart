@@ -80,7 +80,7 @@ server: $(OBJ_SERVER) $(OBJ_MISC) $(OBJ_CORE) $(OBJ_HELPER) | $(BINDIR)
 
 
 # Make directory if does not exist
-$(BINDIR) $(OBJDIR) $(OBJDIR_CLIENT) $(OBJDIR_SERVER):
+$(BINDIR) $(OBJDIR_SERVER):
 	mkdir -p $@
 
 -include $(DEP_MISC)
