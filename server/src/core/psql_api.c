@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <pthread.h>
 
 #include "psql_api.h"
 #include "libpq-fe.h"
@@ -10,6 +12,7 @@
  * Make a connection to the database server and create tables
 https://www.postgresql.org/docs/8.1/libpq.html#LIBPQ-CONNECT
 */
+// TODOS: restituire la struct
 PGconn *init_db(const char *conninfo) {
   // Create the connection
   PGconn *conn = PQconnectdb(conninfo);
@@ -19,7 +22,19 @@ PGconn *init_db(const char *conninfo) {
     PQfinish(conn);
     return NULL;
   }
-  //TODO: create tables here
+  
+  //TODO:inizializza la struttura
+
+  // Create tables
+  if (!create_table(conn, CRT_PRODUCT_TBL))
+    return NULL;
+
+  // popola la tabella prodotti se non lo è già
+  // N.B.: usare e gestire un bool che te lo dica
+
+  if (!create_table(conn, CRT_RECEIPT_TBL))
+    return NULL;
+
   return conn;
 }
 
