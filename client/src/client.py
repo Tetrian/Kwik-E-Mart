@@ -31,15 +31,16 @@ class Client():
         payload = self.socket.recv(pl.BUFFSIZE)
         if payload == b'':
             raise RuntimeError("socket connection broken")
-        if not pl.is_valid(payload, expected_code, len(payload)):
+        if not pl.is_valid(payload, expected_code):
             self.socket.write(pl.NAK.to_bytes(1, 'little'))
             msg = None
         else:
             self.socket.write(pl.ACK.to_bytes(1, 'little'))
-            msg = pl.parse_payload(payload, len(payload))
+            msg = pl.parse_payload(payload)
         return msg
 
 
+# Test
 if __name__ == '__main__':
     import logging.config
     logging.config.fileConfig('helper/logging.conf')
