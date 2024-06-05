@@ -80,7 +80,7 @@ server_t *init_server(unsigned int port, const char *db_conn_info,
 
   // Initialization of the database
   if ((s->db = init_db(db_conn_info)) == NULL) {
-    log_error("[%s] (%s) Failed to initializate the db!",
+    log_error("[%s] (%s) Failed to initializate the db!\n",
               __FILE_NAME__, __func__);
     destroy_server(s);
     return NULL;
