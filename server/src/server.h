@@ -5,6 +5,7 @@
 #include <pthread.h>
 
 #include "./helper/ts_queue.h"
+#include "./core/psql_api.h"
 #include "libpq-fe.h"
 
 /* ************************************************************************** */
@@ -13,7 +14,7 @@
 typedef struct server_t {
 	ssize_t socket;
 	struct sockaddr_in transport;
-	//TODO: add database connection
+	db_t *db;
 	//TODO: add checkouts pool
 	pthread_t *workers;
 	ts_queue_t *queue;

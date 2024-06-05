@@ -1,10 +1,10 @@
 {
   "Servers": {
     "1": {
-      "Name": "Campo42",
+      "Name": "Kwik-E-Mart",
       "Group": "Servers",
       "Host": "database",
-      "Port": 5432,
+      "Port": 5454,
       "MaintenanceDB": "postgres",
       "Username": "root",
       "Shared": true,

@@ -78,8 +78,15 @@ server_t *init_server(unsigned int port, const char *db_conn_info,
   s->queue = NULL;
   s->workers = NULL;
 
-  //TODO: Initialization of the database
-  (void)db_conn_info;
+  // Initialization of the database
+  if ((s->db = init_db(db_conn_info)) == NULL) {
+    log_error("[%s] (%s) Failed to initializate the db!",
+              __FILE_NAME__, __func__);
+    destroy_server(s);
+    return NULL;
+  }
+  log_info("[%s] (%s) Database initializated and server connected to it.\n",
+            __FILE_NAME__, __func__);
   
   //TODO: Initialization of the supermarket checkouts
   //NOTE: U can use max_connection for the db_pool too
@@ -156,6 +163,9 @@ void destroy_server(server_t *s) {
 
   log_info("[%s] (%s) Destroying server->queue\n", __FILE_NAME__, __func__);
   destroy_queue(s->queue);
+
+  log_info("[%s] (%s) Destroying server->db\n", __FILE_NAME__, __func__);
+  destroy_db(s->db);
   
   free(s);
   log_info("[%s] (%s) Goodbye!\n", __FILE_NAME__, __func__);

@@ -19,7 +19,7 @@
 #define MAX_CASHIER 3
 
 #define DB_CONN_INFO                                                           \
-  "host=localhost port=5432 dbname=postgres user=root password=password "      \
+  "host=localhost port=5454 dbname=postgres user=root password=password "      \
   "connect_timeout=10"
 
 int main() {
