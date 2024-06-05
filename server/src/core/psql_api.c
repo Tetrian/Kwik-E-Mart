@@ -83,6 +83,15 @@ bool create_table(PGconn *conn, const char *create_cmd) {
 
 /** populate the product table */
 void populate_product_tbl(db_t * db) {
+  // check if product is already populate
+  PGresult *res = PQexec(db->conn, "SELECT COUNT(*) FROM product");
+  if (strtol(PQgetvalue(res, 0, 0), NULL, 10) > 0) {
+    PQclear(res);
+    log_info("[%s] (%s) Table 'product' isn't empty, skipping\n",
+             __FILE_NAME__, __func__);
+    return;
+  }
+
   // declare products name
   const char *const names[] = {"Duff Beer", "KrustyO's", "Pizza", 
                   "Donuts", "Buzz Cola", "Slurpee", "Pollo"};
