@@ -14,3 +14,10 @@
             text: 'Attendi per poter entrare nel negozio.'
             font_size: 30
             size_hint: None, None
+
+<InsideScreen>:
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: '../res/screenbg/inside.jpg'

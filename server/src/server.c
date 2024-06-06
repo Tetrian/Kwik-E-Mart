@@ -6,6 +6,7 @@
 
 #include "./core/config.h"
 #include "./core/psql_api.h"
+#include "./core/msg_handler.h"
 #include "./helper/logging.h"
 #include "./helper/ts_queue.h"
 #include "./helper/signal_handler.h"
@@ -87,6 +88,14 @@ server_t *init_server(unsigned int port, const char *db_conn_info,
   }
   log_info("[%s] (%s) Database initializated and server connected to it.\n",
             __FILE_NAME__, __func__);
+
+  // get the products list
+  if (get_all_products(s->db, s->products) == 0) {
+    log_error("[%s] (%s) Failed to get product list.\n",
+              __FILE_NAME__, __func__);
+    destroy_server(s);
+    return NULL;
+  }
   
   //TODO: Initialization of the supermarket checkouts
   //NOTE: U can use max_connection for the db_pool too
@@ -205,7 +214,20 @@ void *connection_handler(void *sd) {
   log_info(
       "[%s] (%s) Start communication with the client on socket n°%d.\n",
       __FILE_NAME__, __func__, socket);
+  server_t *s = ((server_t *)sd);
   
+  log_info("[%s] (%s) Sending products list to socket n°%d.\n",
+           __FILE_NAME__, __func__, socket);
+  
+  char ack;
+  do {
+    write_msg(socket, BEL, s->products);
+    read(socket, &ack, 1);
+  } while (ack != ACK);
+  
+  log_info("[%s] (%s) Socket n°%d is inside the market\n",
+           __FILE_NAME__, __func__, socket);
+
   return NULL;
 }
 

@@ -22,7 +22,7 @@ def create_payload(code, msg):
 # parsing of the message in the payload
 def parse_payload(payload):
     msg = payload[MSGBOUND:-MSGBOUND]
-    return msg.decode('ascii')
+    return msg.decode('utf-8')
 
 # check if the payload is valid
 def is_valid(payload, expected_code):

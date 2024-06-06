@@ -146,14 +146,15 @@ void insert(db_t *db, const char *cmd, const int id,
  * name€price$
  * @param db database struct
  * @param str string to save the products, must be ""
+ * @return the number of product getted
  */
-void get_all_products(db_t *db, char *str) {
+int get_all_products(db_t *db, char *str) {
   pthread_mutex_lock(&(db->mutex));
   PGresult *res = PQexec(db->conn, "SELECT name, price FROM product");
   pthread_mutex_unlock(&(db->mutex));
 
-  size_t rows = PQntuples(res);
-  for (size_t i = 0; i < rows; ++i) {
+  int rows = PQntuples(res);
+  for (int i = 0; i < rows; ++i) {
     strcat(str, PQgetvalue(res, i, 0));
     strcat(str, "€");
     strcat(str, PQgetvalue(res, i, 1));
@@ -161,6 +162,7 @@ void get_all_products(db_t *db, char *str) {
   }
 
   PQclear(res);
+  return rows;
 }
 
 /*

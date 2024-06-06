@@ -31,6 +31,7 @@
 #define ENOUGHT 10 // plenty size for id and price string
 #define PRICE_MAX 100 // max price of a single product
 #define CMDSIZE 30 // size for cmd in get_last_id
+#define LSTSIZE 1000 // size for products list
 
 /* ************************************************************************** */
 
@@ -59,7 +60,7 @@ void populate_product_tbl(db_t *);
 
 void insert(db_t *, const char *, const int, const char *, const float);
 
-void get_all_products(db_t *, char *);
+int get_all_products(db_t *, char *);
 
 int get_last_id(db_t*, const char *);
 

@@ -32,10 +32,10 @@ class Client():
         if payload == b'':
             raise RuntimeError("socket connection broken")
         if not pl.is_valid(payload, expected_code):
-            self.socket.write(pl.NAK.to_bytes(1, 'little'))
+            self.socket.send(pl.NAK.to_bytes(1, 'little'))
             msg = None
         else:
-            self.socket.write(pl.ACK.to_bytes(1, 'little'))
+            self.socket.send(pl.ACK.to_bytes(1, 'little'))
             msg = pl.parse_payload(payload)
         return msg
 
@@ -46,3 +46,5 @@ if __name__ == '__main__':
     logging.config.fileConfig('helper/logging.conf')
 
     client = Client()
+    msg = client.read_msg(pl.BEL)
+    logger.info(msg)

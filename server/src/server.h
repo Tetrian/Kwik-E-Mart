@@ -15,10 +15,11 @@ typedef struct server_t {
 	ssize_t socket;
 	struct sockaddr_in transport;
 	db_t *db;
-	//TODO: add checkouts pool
 	pthread_t *workers;
 	ts_queue_t *queue;
 	size_t max_workers;
+	//TODO: add checkouts pool
+	char products[LSTSIZE];
 } server_t;
 
 // Basic structures for server management
