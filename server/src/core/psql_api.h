@@ -30,6 +30,7 @@
 #define N_PARAMS 3
 #define ENOUGHT 10 // plenty size for id and price string
 #define PRICE_MAX 100 // max price of a single product
+#define CMDSIZE 30 // size for cmd in get_last_id
 
 /* ************************************************************************** */
 
@@ -57,9 +58,10 @@ void populate_product_tbl(db_t *);
 // data operations
 
 void insert(db_t *, const char *, const int, const char *, const float);
-//      insert_receipt (va sincronizzata)
-//      get_all_products (va sincronizzata se la uso nei thread altrimenti)
-//                       (posso chiamarla prima e salvarla nel server)
+
+void get_all_products(db_t *, char *);
+
+int get_last_id(db_t*, const char *);
 
 /* ************************************************************************** */
 

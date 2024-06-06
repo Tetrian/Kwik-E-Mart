@@ -56,7 +56,7 @@ db_t *init_db(const char *conninfo) {
   log_info("[%s] (%s) Starting populate the products table...\n",
            __FILE_NAME__, __func__);
   populate_product_tbl(db);
-
+  
   return db;
 }
 
@@ -84,13 +84,11 @@ bool create_table(PGconn *conn, const char *create_cmd) {
 /** populate the product table */
 void populate_product_tbl(db_t * db) {
   // check if product is already populate
-  PGresult *res = PQexec(db->conn, "SELECT COUNT(*) FROM product");
-  if (strtol(PQgetvalue(res, 0, 0), NULL, 10) > 0) {
-    PQclear(res);
+  if (get_last_id(db, "product") > 0) {
     log_info("[%s] (%s) Table 'product' isn't empty, skipping\n",
              __FILE_NAME__, __func__);
     return;
-  }
+  } 
 
   // declare products name
   const char *const names[] = {"Duff Beer", "KrustyO's", "Pizza", 
@@ -136,10 +134,51 @@ void insert(db_t *db, const char *cmd, const int id,
   );
 
 	if (PQresultStatus(res) != PGRES_COMMAND_OK)
-		log_error("[%s] (%s) INSERT failed: %s",__FILE_NAME__,
+		log_error("[%s] (%s) INSERT failed: %s\n",__FILE_NAME__,
               __func__, PQerrorMessage(db->conn));
 	PQclear(res);
 
   pthread_mutex_unlock(&(db->mutex));
 }
 
+/*
+ * get name and price of all products in the format
+ * name€price$
+ * @param db database struct
+ * @param str string to save the products, must be ""
+ */
+void get_all_products(db_t *db, char *str) {
+  pthread_mutex_lock(&(db->mutex));
+  PGresult *res = PQexec(db->conn, "SELECT name, price FROM product");
+  pthread_mutex_unlock(&(db->mutex));
+
+  size_t rows = PQntuples(res);
+  for (size_t i = 0; i < rows; ++i) {
+    strcat(str, PQgetvalue(res, i, 0));
+    strcat(str, "€");
+    strcat(str, PQgetvalue(res, i, 1));
+    strcat(str, "$");
+  }
+
+  PQclear(res);
+}
+
+/*
+ * get the number of last id
+ * @param db database struct
+ * @param table_name name of the table
+ * @return the number of last id
+ */
+int get_last_id(db_t* db, const char *table_name) {
+  char cmd[CMDSIZE] = "SELECT COUNT(*) FROM ";
+  strcat(cmd, table_name);
+
+  pthread_mutex_lock(&(db->mutex));
+  PGresult *res = PQexec(db->conn, cmd);
+  pthread_mutex_unlock(&(db->mutex));
+
+  int nid = strtol(PQgetvalue(res, 0, 0), NULL, 10);
+  PQclear(res);
+  
+  return nid;
+}
