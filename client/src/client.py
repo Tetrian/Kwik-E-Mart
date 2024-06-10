@@ -20,7 +20,7 @@ class Client():
         logger.info('Client Ready!')
     
     # write a message to the socket
-    def write_msg(self, code, msg):
+    def write_msg(self, code, msg=None):
         payload = pl.create_payload(code, msg)
         sent = self.socket.send(payload)
         if sent == 0:
@@ -31,12 +31,10 @@ class Client():
         payload = self.socket.recv(pl.BUFFSIZE)
         if payload == b'':
             raise RuntimeError("socket connection broken")
-        if not pl.is_valid(payload, expected_code):
-            self.socket.send(pl.NAK.to_bytes(1, 'little'))
-            msg = None
-        else:
-            self.socket.send(pl.ACK.to_bytes(1, 'little'))
+        if pl.is_valid(payload, expected_code):
             msg = pl.parse_payload(payload)
+        else:
+            msg = None
         return msg
 
 
@@ -46,5 +44,6 @@ if __name__ == '__main__':
     logging.config.fileConfig('helper/logging.conf')
 
     client = Client()
+    client.write_msg(pl.BEL)
     msg = client.read_msg(pl.BEL)
     logger.info(msg)

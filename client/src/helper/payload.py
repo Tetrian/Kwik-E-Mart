@@ -1,12 +1,10 @@
 
 # ASCII control characters
 SOH = 1
-ACK = 6
 BEL = 7
 CR  = 13
 SO  = 14
 SI  = 14
-NAK = 21
 
 # Buffer max size
 BUFFSIZE = 250
@@ -14,9 +12,10 @@ MSGBOUND = 2
 
 # generate the payload from a message
 def create_payload(code, msg):
-    payload = b'' + SOH.to_bytes(1, 'little')
-    payload += code.to_bytes(1, 'little') + msg.encode()
-    payload += checksum(payload) + SO.to_bytes(1, 'little')
+    payload = b'' + SOH.to_bytes(1, 'little') + code.to_bytes(1, 'little')
+    if msg != None:
+        payload += msg.encode()
+    payload += checksum(payload) + CR.to_bytes(1, 'little')
     return payload
 
 # parsing of the message in the payload

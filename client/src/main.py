@@ -13,8 +13,14 @@ logger = logging.getLogger('root')
 class OutsideScreen(Screen):
     def __init__(self, **kwargs):
         super(Screen, self).__init__(**kwargs)
+        Clock.schedule_once(self.enter_request)
         self.event = Clock.schedule_interval(self.on_entrance, 3)
     
+    def enter_request(self, dt):
+        logger.info("Send request for enter in the market.")
+        app = App.get_running_app()
+        app.client.write_msg(pl.BEL, '')
+
     def on_entrance(self, dt):
         logger.info("Try to enter in the market.")
         app = App.get_running_app()

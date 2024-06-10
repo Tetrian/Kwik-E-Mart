@@ -215,19 +215,34 @@ void *connection_handler(void *sd) {
       "[%s] (%s) Start communication with the client on socket n°%d.\n",
       __FILE_NAME__, __func__, socket);
   server_t *s = ((server_t *)sd);
-  
-  log_info("[%s] (%s) Sending products list to socket n°%d.\n",
-           __FILE_NAME__, __func__, socket);
-  
-  char ack;
-  do {
-    write_msg(socket, BEL, s->products);
-    read(socket, &ack, 1);
-  } while (ack != ACK);
-  
-  log_info("[%s] (%s) Socket n°%d is inside the market\n",
-           __FILE_NAME__, __func__, socket);
 
+  while (_keep_alive) {
+    uint8_t request[BUFFSIZE];
+    ssize_t readed_bytes = read(socket, request, BUFFSIZE);
+    if (readed_bytes == -1) {
+      log_error("[%s] (%s) Socket n°%d is broken. End communication.\n",
+      __FILE_NAME__, __func__, socket);
+      break;
+    }
+
+    // handle the request
+    if (is_valid(request, readed_bytes)) {
+      switch (request[CMD_POS]) {
+        case BEL:
+          write_msg(socket, BEL, s->products);
+          log_info("[%s] (%s) Socket n°%d is inside the market\n",
+                  __FILE_NAME__, __func__, socket);
+          break;
+        
+        case SI:
+          // TODO: gestire la cassa
+          write_msg(socket, SO, NULL);
+          goto exit_loop;
+      }
+    }
+    
+  }
+  exit_loop: ;
   return NULL;
 }
 
