@@ -6,6 +6,7 @@ from kivy.clock import Clock
 
 from client import Client
 import helper.payload as pl
+import core.mark_api as mark
 
 import logging
 logger = logging.getLogger('root')
@@ -30,11 +31,22 @@ class OutsideScreen(Screen):
         else:
             self.event.cancel()
             app.on_inside(msg)
-            
 
 
 class InsideScreen(Screen):
-    pass
+    def __init__(self, **kwargs):
+        super(Screen, self).__init__(**kwargs)
+        self.event = Clock.schedule_interval(self.add_products, 1)
+    
+    def add_products(self, dt):
+        app = App.get_running_app()
+        if app.manager.current == 'inside':
+            bl = self.ids.shelf
+            logger.debug(bl)
+            products = app.products
+            for product in products:
+                name, price = product.split('€')
+                logger.debug(f'name: {name}\t€: {price}')
 
 
 class Kwik_E_MartApp(App):
@@ -49,9 +61,8 @@ class Kwik_E_MartApp(App):
         self.manager = sm
         return sm
     
-    def on_inside(self, lst):
-        #TODO:parsing products list
-        logger.debug(lst)
+    def on_inside(self, string):
+        self.products = string.split('$')
         self.manager.current = 'inside'
 
 
