@@ -3,7 +3,7 @@ import logging
 logger = logging.getLogger('root')
 
 def parse_products(string):
-    products = string.split('$')
+    products = string[:-1].split('$')
 
     dct = dict()
     for product in products:
@@ -20,6 +20,6 @@ if __name__ == '__main__':
     logging.config.fileConfig('../helper/logging.conf')
 
     dictionary = parse_products(
-        "Duff Beer€84.02$KrustyO's€39.44$Pizza€78.31$Donuts€79.84$Cola€91.16"
+        "Duff Beer€84.02$KrustyO's€39.44$Pizza€78.31$Donuts€79.84$Cola€91.16$"
     )
     logger.info(f"Dictionary\n{dictionary}")

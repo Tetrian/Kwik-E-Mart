@@ -43,16 +43,15 @@ class InsideScreen(Screen):
         if app.manager.current == 'inside':
             bl = self.ids.shelf
             logger.debug(bl)
-            products = app.products
-            for product in products:
-                name, price = product.split('€')
-                logger.debug(f'name: {name}\t€: {price}')
+            logger.debug(app.products)
+            self.event.cancel()
 
 
 class Kwik_E_MartApp(App):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.client = Client()
+        self.products = dict()
 
     def build(self):
         sm = ScreenManager()
@@ -62,11 +61,9 @@ class Kwik_E_MartApp(App):
         return sm
     
     def on_inside(self, string):
-        self.products = string.split('$')
+        self.products = dict(mark.parse_products(string))
         self.manager.current = 'inside'
 
 
 if __name__ == '__main__':
-    import logging.config
-    logging.config.fileConfig('helper/logging.conf')
     Kwik_E_MartApp().run()
