@@ -1,6 +1,5 @@
 
 from kivy.app import App
-from kivy.uix.label import Label
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.clock import Clock
 
@@ -13,7 +12,7 @@ logger = logging.getLogger('root')
 
 class OutsideScreen(Screen):
     def __init__(self, **kwargs):
-        super(Screen, self).__init__(**kwargs)
+        super(OutsideScreen, self).__init__(**kwargs)
         Clock.schedule_once(self.enter_request)
         self.event = Clock.schedule_interval(self.on_entrance, 3)
     
@@ -35,7 +34,7 @@ class OutsideScreen(Screen):
 
 class InsideScreen(Screen):
     def __init__(self, **kwargs):
-        super(Screen, self).__init__(**kwargs)
+        super(InsideScreen, self).__init__(**kwargs)
         self.event = Clock.schedule_interval(self.add_products, 1)
     
     def add_products(self, dt):
@@ -49,9 +48,10 @@ class InsideScreen(Screen):
 
 class Kwik_E_MartApp(App):
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super(Kwik_E_MartApp, self).__init__(**kwargs)
         self.client = Client()
         self.products = dict()
+        self.cart = []
 
     def build(self):
         sm = ScreenManager()
