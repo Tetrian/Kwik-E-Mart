@@ -4,8 +4,9 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.clock import Clock
 
 from client import Client
-import helper.payload as pl
-import core.mark_api as mark
+from helper.parser import parse_products, get_resource
+from helper.payload import BEL
+from core.product import Product
 
 import logging
 logger = logging.getLogger('root')
@@ -19,12 +20,12 @@ class OutsideScreen(Screen):
     def enter_request(self, dt):
         logger.info("Send request for enter in the market.")
         app = App.get_running_app()
-        app.client.write_msg(pl.BEL, '')
+        app.client.write_msg(BEL, '')
 
     def on_entrance(self, dt):
         logger.info("Try to enter in the market.")
         app = App.get_running_app()
-        msg = app.client.read_msg(pl.BEL)
+        msg = app.client.read_msg(BEL)
         if msg == None:
             logger.info("Permission denied.")
         else:
@@ -40,11 +41,16 @@ class InsideScreen(Screen):
     def add_products(self, dt):
         app = App.get_running_app()
         if app.manager.current == 'inside':
-            bl = self.ids.shelf
-            logger.debug(bl)
+            self.init_shelf(app)
             logger.debug(app.products)
             self.event.cancel()
 
+    def init_shelf(self, app):
+        shelf = self.ids.shelf
+        for name, price in app.products.items():
+            source = get_resource(name)
+            product = Product(name, price, source)
+            shelf.add_widget(product)
 
 class Kwik_E_MartApp(App):
     def __init__(self, **kwargs):
@@ -61,7 +67,7 @@ class Kwik_E_MartApp(App):
         return sm
     
     def on_inside(self, string):
-        self.products = dict(mark.parse_products(string))
+        self.products = dict(parse_products(string))
         self.manager.current = 'inside'
 
 

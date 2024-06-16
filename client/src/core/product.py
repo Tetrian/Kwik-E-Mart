@@ -5,9 +5,10 @@ from kivy.lang.builder import Builder
 Builder.load_string('''
 <Product>:
     orientation: 'vertical'
+    size_hint: None, None
     name: 'ProductName'
     price: 0.0
-    source: '../../res/sign.png'
+    source: '../res/sign.png'
     
     Image:
         pos: self.pos
@@ -29,10 +30,10 @@ class Product(BoxLayout):
         self.name = name
         self.price = price
         if source != '':
-            self.source = source
+            self.source = '../res/products/' + source
     
     # When the touch has occured inside the widgets area
-    # return the pair (name, price)
+    # add this product to cart
     def on_touch_down(self, touch):
         if self.collide_point(*touch.pos):
             app = App.get_running_app()
@@ -48,7 +49,7 @@ if __name__ == '__main__':
         def build(self):
             bl = BoxLayout()
             bl.add_widget(Product('1', 1))
-            bl.add_widget(Product('2', 2))
+            bl.add_widget(Product('Duff Beer', 4.44, 'duff.png'))
             bl.bind(on_touch_up = lambda x, y: print(self.cart))
             return bl
     

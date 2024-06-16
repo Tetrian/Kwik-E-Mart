@@ -92,7 +92,7 @@ void populate_product_tbl(db_t * db) {
 
   // declare products name
   const char *const names[] = {"Duff Beer", "KrustyO's", "Pizza", 
-                  "Donuts", "Buzz Cola", "Slurpee", "Pollo"};
+                  "Donut", "Buzz Cola", "Slurpee", "Chicken"};
   size_t size = 7;
 
   for (size_t i = 0; i < size; ++i) {
