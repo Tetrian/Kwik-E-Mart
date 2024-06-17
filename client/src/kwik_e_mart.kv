@@ -11,7 +11,7 @@
         anchor_y: 'bottom'
         Label:
             id: lbl
-            text: 'Attendi per poter entrare nel negozio.'
+            text: 'Please, wait to enter the store.'
             font_size: 30
             size_hint: None, None
 
@@ -24,13 +24,27 @@
     
     BoxLayout:
         size_hint: 1, .5
+        sspacing: 10
 
         GridLayout:
             id: shelf
             rows: 2
+            spacing: 5
+            padding: 10
         
-        Cart:
+        BoxLayout:
+            id: cartlayout
+            orientation: 'vertical'
 
-
-<Cart@Label>:
-    text: 'TODO: cart'
+            Label:
+            Label:
+                text: 'Number of Products in the Cart: ' + str(len(root.cart))
+            BoxLayout:
+                Button:
+                    text: 'Remove Last Products'
+                    on_press: if root.cart: root.cart.pop()
+                Button:
+                    text: 'Clear Cart'
+                    on_press: del root.cart[:]
+            Button:
+                text: 'TODO:GoToPay'

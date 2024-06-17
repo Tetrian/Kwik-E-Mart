@@ -1,6 +1,7 @@
 
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.properties import ListProperty
 from kivy.clock import Clock
 
 from client import Client
@@ -34,6 +35,8 @@ class OutsideScreen(Screen):
 
 
 class InsideScreen(Screen):
+    cart = ListProperty([])
+
     def __init__(self, **kwargs):
         super(InsideScreen, self).__init__(**kwargs)
         self.event = Clock.schedule_interval(self.add_products, 1)
@@ -42,7 +45,7 @@ class InsideScreen(Screen):
         app = App.get_running_app()
         if app.manager.current == 'inside':
             self.init_shelf(app)
-            logger.debug(app.products)
+            #logger.debug(app.products)
             self.event.cancel()
 
     def init_shelf(self, app):
@@ -51,13 +54,15 @@ class InsideScreen(Screen):
             source = get_resource(name)
             product = Product(name, price, source)
             shelf.add_widget(product)
+    
+    def on_cart(self, instance, lst):
+        logger.info(f'Current Cart is {[p[0] for p in lst]}')
 
 class Kwik_E_MartApp(App):
     def __init__(self, **kwargs):
         super(Kwik_E_MartApp, self).__init__(**kwargs)
         self.client = Client()
         self.products = dict()
-        self.cart = []
 
     def build(self):
         sm = ScreenManager()

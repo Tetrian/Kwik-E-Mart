@@ -8,7 +8,7 @@ def parse_products(string):
     dct = dict()
     for product in products:
         name, price = product.split('€')
-        dct[name] = price
+        dct[name] = float(price)
     
     logger.info('Parsing of products done.')
     return dct
