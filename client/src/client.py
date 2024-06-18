@@ -1,6 +1,8 @@
 
 import socket as sk
 import helper.payload as pl
+from helper.parser import parse_products as parse
+from random import randint, uniform
 
 import logging
 logger = logging.getLogger('root')
@@ -15,7 +17,7 @@ class Client():
             self.socket = sk.socket(sk.AF_INET, sk.SOCK_STREAM)
             self.socket.connect((HOST, PORT))
         except sk.error as err:
-            logger.error(f"Socket error! Cause: {err}")
+            logger.error(f"Socket error! Cause {err}")
             raise ValueError("can't connect client to server")
         logger.info('Client Ready!')
     
@@ -43,7 +45,39 @@ if __name__ == '__main__':
     import logging.config
     logging.config.fileConfig('helper/logging.conf')
 
-    client = Client()
-    client.write_msg(pl.BEL)
-    msg = client.read_msg(pl.BEL)
-    logger.info(msg)
+    try:
+        client = Client()
+    except ValueError as err:
+        logger.error(f'Connection to server refuse. Cause: {err}')
+        exit()
+
+    try:
+        client.write_msg(pl.BEL)
+        msg_products = client.read_msg(pl.BEL)
+    except RuntimeError as err:
+        logger.error(f'Exit cause: {err}')
+        exit()
+
+    products = dict(parse(msg_products))
+    logger.debug(f'Products in the shop:\n\t{products}')
+        
+    n_products = randint(0, 10)
+    total_price = round(uniform(10, 1000), 2)
+    logger.info(f'Get in line for the checkout with {n_products} products')
+    si_msg = str(n_products) + '$' + str(total_price)
+    logger.debug(f'SI args: "{si_msg}"')
+    
+    try:
+        client.write_msg(pl.SI)
+    except RuntimeError as err:
+        logger.error(f'Exit cause: {err}')
+        exit()
+        
+    logger.info('Waiting for server repsonse')
+    try:
+        response = client.read_msg(pl.SO)
+    except RuntimeError as err:
+        logger.error(f'Exit cause: {err}')
+    logger.debug(response)
+    logger.info('Client exit from store.')
+    

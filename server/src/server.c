@@ -219,14 +219,18 @@ void *connection_handler(void *sd) {
   while (_keep_alive) {
     uint8_t request[BUFFSIZE];
     ssize_t readed_bytes = read(socket, request, BUFFSIZE);
+      //log_debug("[%s] (%s) Socket n°%d write %d bytes.\n",
+      //         __FILE_NAME__, __func__, socket, readed_bytes);
     if (readed_bytes == -1) {
       log_error("[%s] (%s) Socket n°%d is broken. End communication.\n",
-      __FILE_NAME__, __func__, socket);
+                __FILE_NAME__, __func__, socket);
       break;
     }
 
     // handle the request
     if (is_valid(request, readed_bytes)) {
+      //log_debug("[%s] (%s) Socket n°%d is handling {%d} command.\n",
+      //         __FILE_NAME__, __func__, socket, request[CMD_POS]);
       switch (request[CMD_POS]) {
         case BEL:
           write_msg(socket, BEL, s->products);
@@ -235,6 +239,8 @@ void *connection_handler(void *sd) {
           break;
         
         case SI:
+          log_info("[%s] (%s) Socket n°%d is in queue for checkout\n",
+                  __FILE_NAME__, __func__, socket);
           // TODO: gestire la cassa
           write_msg(socket, SO, NULL);
           goto exit_loop;

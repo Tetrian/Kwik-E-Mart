@@ -21,12 +21,20 @@ class OutsideScreen(Screen):
     def enter_request(self, dt):
         logger.info("Send request for enter in the market.")
         app = App.get_running_app()
-        app.client.write_msg(BEL, '')
+        try:
+            app.client.write_msg(BEL, '')
+        except RuntimeError as err:
+            logger.error(err)
+            app.stop()
 
     def on_entrance(self, dt):
         logger.info("Try to enter in the market.")
         app = App.get_running_app()
-        msg = app.client.read_msg(BEL)
+        try:
+            msg = app.client.read_msg(BEL)
+        except RuntimeError as err:
+            logger.error(err)
+            app.stop()
         if msg == None:
             logger.info("Permission denied.")
         else:
@@ -69,7 +77,11 @@ class InsideScreen(Screen):
         logger.debug(msg)
 
         app = App.get_running_app()
-        app.client.write_msg(SI, msg)
+        try:
+            app.client.write_msg(SI, msg)
+        except RuntimeError as err:
+            logger.error(err)
+            app.stop()
         app.on_checkout(total)
 
 
@@ -107,7 +119,13 @@ class Kwik_E_MartApp(App):
     def on_checkout(self, total):
         self.total = total
         self.manager.current = 'checkout'
+    
+    def on_stop(self):
+        logger.info("Application is shutting down.")
 
 
 if __name__ == '__main__':
-    Kwik_E_MartApp().run()
+    try:
+        Kwik_E_MartApp().run()
+    except ValueError as err:
+        logger.error(f'Exit. Cause {err}')

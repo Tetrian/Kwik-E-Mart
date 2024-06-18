@@ -4,7 +4,7 @@ SOH = 1
 BEL = 7
 CR  = 13
 SO  = 14
-SI  = 14
+SI  = 15
 
 # Buffer max size
 BUFFSIZE = 250
