@@ -19,17 +19,17 @@ def get_resource(name):
         case 'Duff Beer':
             res = 'duff.png'
         case 'KrustyO\'s':
-            res = 'cereal.jpg'
+            res = 'cereal.png'
         case 'Pizza':
-            res = 'pizza.jpg'
+            res = 'pizza.png'
         case 'Donut':
             res = 'donut.png'
         case 'Buzz Cola':
-            res = 'cola.jpg'
+            res = 'cola.png'
         case 'Slurpee':
-            res = 'slurpee.jpg'
+            res = 'slurpee.png'
         case 'Chicken':
-            res = 'chicken.jpg'
+            res = 'chicken.png'
     return res
 
 

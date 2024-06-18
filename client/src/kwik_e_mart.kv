@@ -32,11 +32,12 @@
             spacing: 5
             padding: 10
         
+        # Cart Layout
         BoxLayout:
-            id: cartlayout
             orientation: 'vertical'
 
             Label:
+                # for spacing
             Label:
                 text: 'Number of Products in the Cart: ' + str(len(root.cart))
             BoxLayout:
@@ -47,4 +48,12 @@
                     text: 'Clear Cart'
                     on_press: del root.cart[:]
             Button:
-                text: 'TODO:GoToPay'
+                text: 'GO TO PAY'
+                on_press: root.on_pay_btn()
+
+<CheckoutScreen>:
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: '../res/screenbg/checkout.jpg'

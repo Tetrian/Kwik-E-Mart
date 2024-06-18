@@ -6,7 +6,7 @@ from kivy.clock import Clock
 
 from client import Client
 from helper.parser import parse_products, get_resource
-from helper.payload import BEL
+from helper.payload import BEL, SI, SO
 from core.product import Product
 
 import logging
@@ -57,23 +57,56 @@ class InsideScreen(Screen):
     
     def on_cart(self, instance, lst):
         logger.info(f'Current Cart is {[p[0] for p in lst]}')
+    
+    def on_pay_btn(self):
+        logger.info('Get in line for the checkout')
+        
+        total = 0
+        for product in self.cart:
+            total += product[1]
+        
+        msg = str(len(self.cart)) + '$' + str(total)
+        logger.debug(msg)
+
+        app = App.get_running_app()
+        app.client.write_msg(SI, msg)
+        app.on_checkout(total)
+
+
+class CheckoutScreen(Screen):
+    def  __init__(self, **kwargs):
+        super(CheckoutScreen, self).__init__(**kwargs)
+        self.event = Clock.schedule_interval(self.on_wait, 1)
+    
+    def on_wait(self, dt):
+        app = App.get_running_app()
+        if app.total != -1:
+            logger.debug("TODO: Wait for the total")
+            self.event.cancel()
+
 
 class Kwik_E_MartApp(App):
     def __init__(self, **kwargs):
         super(Kwik_E_MartApp, self).__init__(**kwargs)
         self.client = Client()
         self.products = dict()
+        self.total = -1
 
     def build(self):
         sm = ScreenManager()
         sm.add_widget(OutsideScreen(name='outside'))
         sm.add_widget(InsideScreen(name='inside'))
+        sm.add_widget(CheckoutScreen(name='checkout'))
         self.manager = sm
         return sm
     
     def on_inside(self, string):
         self.products = dict(parse_products(string))
         self.manager.current = 'inside'
+    
+    def on_checkout(self, total):
+        self.total = total
+        self.manager.current = 'checkout'
 
 
 if __name__ == '__main__':
