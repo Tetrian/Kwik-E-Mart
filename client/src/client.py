@@ -68,7 +68,7 @@ if __name__ == '__main__':
     logger.debug(f'SI args: "{si_msg}"')
     
     try:
-        client.write_msg(pl.SI)
+        client.write_msg(pl.SI, si_msg)
     except RuntimeError as err:
         logger.error(f'Exit cause: {err}')
         exit()
@@ -80,4 +80,3 @@ if __name__ == '__main__':
         logger.error(f'Exit cause: {err}')
     logger.debug(response)
     logger.info('Client exit from store.')
-    

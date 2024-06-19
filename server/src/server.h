@@ -6,6 +6,7 @@
 
 #include "./helper/ts_queue.h"
 #include "./core/psql_api.h"
+#include "./core/checkout.h"
 #include "libpq-fe.h"
 
 /* ************************************************************************** */
@@ -16,9 +17,10 @@ typedef struct server_t {
 	struct sockaddr_in transport;
 	db_t *db;
 	pthread_t *workers;
-	ts_queue_t *queue;
 	size_t max_workers;
-	//TODO: add checkouts pool
+	ts_queue_t *queue;
+	checkout_t **checkouts;
+	size_t max_checkouts;
 	char products[LSTSIZE];
 } server_t;
 

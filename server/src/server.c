@@ -5,6 +5,7 @@
 #include <unistd.h>
 
 #include "./core/config.h"
+#include "./core/checkout.h"
 #include "./core/psql_api.h"
 #include "./core/msg_handler.h"
 #include "./helper/logging.h"
@@ -78,6 +79,7 @@ server_t *init_server(unsigned int port, const char *db_conn_info,
   // Init  value for conditional jump in destroy servers
   s->queue = NULL;
   s->workers = NULL;
+  s->checkouts = NULL;
 
   // Initialization of the database
   if ((s->db = init_db(db_conn_info)) == NULL) {
@@ -97,10 +99,6 @@ server_t *init_server(unsigned int port, const char *db_conn_info,
     destroy_server(s);
     return NULL;
   }
-  
-  //TODO: Initialization of the supermarket checkouts
-  //NOTE: U can use max_connection for the db_pool too
-  (void)max_connections;
 
   // Initialization of the variables for the clients connection
   if ((s->queue = init_queue()) == NULL) {
@@ -143,6 +141,28 @@ server_t *init_server(unsigned int port, const char *db_conn_info,
              i + 1);
   }
 
+  //Initialization of the supermarket checkouts
+  if ((s->checkouts = malloc(sizeof(checkout_t[max_connections]))) == NULL) {
+    log_error("[%s] (%s) Failed to allocate enough space for the "
+              "server->checkouts! Cause: %s\n",
+              __FILE_NAME__, __func__, strerror(errno));
+    destroy_server(s);
+    return NULL;
+  }
+  
+  s->max_checkouts = max_connections;
+  for (size_t i = 0; i < max_connections; i++) {
+    s->checkouts[i] = init_checkout();
+    if (s->checkouts[i] == NULL) {
+      log_error("[%s] (%s) Failed to init checkout n° %zu!\n",
+                __FILE_NAME__, __func__, i + 1);
+      destroy_server(s);
+      return NULL;
+    }
+    log_info("[%s] (%s) Added checkout n° %zu\n", __FILE_NAME__, __func__,
+             i + 1);
+  }
+
   log_info("[%s] (%s) Server ready, please use server_loop!\n", __FILE_NAME__,
            __func__);
 
@@ -155,6 +175,12 @@ void destroy_server(server_t *s) {
   log_info("[%s] (%s) Shutting down the server <%ld> as requested\n",
           __FILE_NAME__, __func__, s->socket);
   close(s->socket);
+
+  log_info("[%s] (%s) Destroying server->checkouts\n", __FILE_NAME__, 
+            __func__);
+  for (size_t i = 0; i < s->max_checkouts; i++)
+    destroy_checkout(s->checkouts[i]);
+  free(s->checkouts);
 
   if (s->workers != NULL) {
     log_info("[%s] (%s) Destroying server->pool\n", __FILE_NAME__, __func__);
@@ -240,9 +266,23 @@ void *connection_handler(void *sd) {
           break;
         
         case SI:
-          log_info("[%s] (%s) Socket n°%d is in queue for checkout\n",
+          char receipt[readed_bytes - WRAPSIZE + 1];
+          receipt[readed_bytes - WRAPSIZE] = '\0';
+          parse_payload(request, receipt, readed_bytes);
+          log_debug("[%s] (%s) Socket n°%d receipt {%s}\n",
+                  __FILE_NAME__, __func__, socket, receipt);
+          
+          size_t n_products = (size_t)strtol(receipt, NULL, 10);
+          if (n_products > 0) {
+            log_info("[%s] (%s) Socket n°%d is in queue for checkout\n",
                   __FILE_NAME__, __func__, socket);
-          // TODO: gestire la cassa
+            int delay = enter_checkout(s->checkouts[socket%s->max_checkouts]);
+            log_debug("[%s] (%s) Socket n°%d need to wait %ds to pay.\n",
+                  __FILE_NAME__, __func__, socket, delay);
+            sleep(delay + n_products);
+            leave_checkout(s->checkouts[socket%s->max_checkouts]);
+          }
+          
           write_msg(socket, SO, NULL);
           goto exit_loop;
       }
