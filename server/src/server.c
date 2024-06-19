@@ -90,6 +90,7 @@ server_t *init_server(unsigned int port, const char *db_conn_info,
             __FILE_NAME__, __func__);
 
   // get the products list
+  s->products[0] = '\0';
   if (get_all_products(s->db, s->products) == 0) {
     log_error("[%s] (%s) Failed to get product list.\n",
               __FILE_NAME__, __func__);
@@ -245,10 +246,12 @@ void *connection_handler(void *sd) {
           write_msg(socket, SO, NULL);
           goto exit_loop;
       }
-    }
-    
+    } 
   }
+  
   exit_loop: ;
+  log_info("[%s] (%s) Socket n°%d exit from the shop\n",
+                  __FILE_NAME__, __func__, socket);
   return NULL;
 }
 
