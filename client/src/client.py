@@ -27,6 +27,7 @@ class Client():
         sent = self.socket.send(payload)
         if sent == 0:
             raise RuntimeError("socket connection broken")
+        return sent
     
     # read a message from the socket
     def read_msg(self, expected_code):
@@ -52,7 +53,7 @@ if __name__ == '__main__':
         exit()
 
     try:
-        client.write_msg(pl.BEL)
+        logger.debug(client.write_msg(pl.BEL))
         msg_products = client.read_msg(pl.BEL)
     except RuntimeError as err:
         logger.error(f'Exit cause: {err}')

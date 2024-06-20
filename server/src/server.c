@@ -23,7 +23,7 @@ static void handle_interrupt(int signal);
 
 server_t *init_server(unsigned int port, const char *db_conn_info,
                       const size_t max_clients, const size_t max_workers,
-                      const size_t max_connections,void *(*routine)(void *)) {
+                      const size_t max_job,void *(*routine)(void *)) {
   server_t *s = malloc(sizeof(struct server_t));
   if (s == NULL) {
     log_error("[%s] (%s) Failed to allocate space for the server\n",
@@ -142,7 +142,7 @@ server_t *init_server(unsigned int port, const char *db_conn_info,
   }
 
   //Initialization of the supermarket checkouts
-  if ((s->checkouts = malloc(sizeof(checkout_t[max_connections]))) == NULL) {
+  if ((s->checkouts = malloc(sizeof(checkout_t[max_job]))) == NULL) {
     log_error("[%s] (%s) Failed to allocate enough space for the "
               "server->checkouts! Cause: %s\n",
               __FILE_NAME__, __func__, strerror(errno));
@@ -150,8 +150,8 @@ server_t *init_server(unsigned int port, const char *db_conn_info,
     return NULL;
   }
   
-  s->max_checkouts = max_connections;
-  for (size_t i = 0; i < max_connections; i++) {
+  s->max_checkouts = max_job;
+  for (size_t i = 0; i < max_job; i++) {
     s->checkouts[i] = init_checkout();
     if (s->checkouts[i] == NULL) {
       log_error("[%s] (%s) Failed to init checkout n° %zu!\n",
@@ -243,7 +243,8 @@ void *connection_handler(void *sd) {
       __FILE_NAME__, __func__, socket);
   server_t *s = ((server_t *)sd);
 
-  while (_keep_alive) {
+  bool flag = true;
+  while (_keep_alive && flag) {
     uint8_t request[BUFFSIZE];
     ssize_t readed_bytes = read(socket, request, BUFFSIZE);
       //log_debug("[%s] (%s) Socket n°%d write %d bytes.\n",
@@ -281,15 +282,15 @@ void *connection_handler(void *sd) {
                   __FILE_NAME__, __func__, socket, delay);
             sleep(delay + n_products);
             leave_checkout(s->checkouts[socket%s->max_checkouts]);
+            //TODO: add receipt to db
           }
-          
           write_msg(socket, SO, NULL);
-          goto exit_loop;
+          flag = false;
+          break;
       }
     } 
   }
-  
-  exit_loop: ;
+
   log_info("[%s] (%s) Socket n°%d exit from the shop\n",
                   __FILE_NAME__, __func__, socket);
   return NULL;
