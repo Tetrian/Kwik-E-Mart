@@ -41,7 +41,7 @@ class Client():
         return msg
 
 
-# Test
+# Automatic client
 if __name__ == '__main__':
     import logging.config
     logging.config.fileConfig('helper/logging.conf')

@@ -2,6 +2,8 @@
 import logging
 logger = logging.getLogger('root')
 
+# create a dictionary from 'string'
+# key is the product name and value the price
 def parse_products(string):
     products = string[:-1].split('$')
 
@@ -13,6 +15,7 @@ def parse_products(string):
     logger.info('Parsing of products done.')
     return dct
 
+# get the icon of food if exist
 def get_resource(name):
     res = ''
     match name:

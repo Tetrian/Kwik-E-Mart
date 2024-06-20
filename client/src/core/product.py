@@ -52,6 +52,7 @@ class Product(BoxLayout):
             screen.cart.append((self.name, self.price))
 
 
+# Test
 if __name__ == '__main__':
     from kivy.app import App
 
