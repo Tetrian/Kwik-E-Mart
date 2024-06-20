@@ -35,6 +35,10 @@ void enqueue(ts_queue_t *, void *);
 
 void *dequeue(ts_queue_t *);
 
+void *peek(ts_queue_t *);
+
+size_t get_size(ts_queue_t *);
+
 // wake all operation in enqueue
 void wake_all(ts_queue_t *);
 

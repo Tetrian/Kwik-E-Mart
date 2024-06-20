@@ -102,6 +102,20 @@ void *dequeue(ts_queue_t *tsq) {
   return val;
 }
 
+void* peek(ts_queue_t *tsq) {
+  pthread_mutex_lock(&(tsq->mx));
+  void *val = tsq->head->value;
+  pthread_mutex_unlock(&(tsq->mx));
+  return val;
+}
+
+size_t get_size(ts_queue_t *tsq) {
+  pthread_mutex_lock(&(tsq->mx));
+  size_t size = tsq->size;
+  pthread_mutex_unlock(&(tsq->mx));
+  return size;
+}
+
 void wake_all(ts_queue_t *tsq) {
   pthread_mutex_lock(&(tsq->mx));
   tsq->keep = false;

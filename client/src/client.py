@@ -53,7 +53,7 @@ if __name__ == '__main__':
         exit()
 
     try:
-        logger.debug(client.write_msg(pl.BEL))
+        client.write_msg(pl.BEL)
         msg_products = client.read_msg(pl.BEL)
     except RuntimeError as err:
         logger.error(f'Exit cause: {err}')

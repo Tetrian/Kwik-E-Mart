@@ -60,6 +60,17 @@ server_t *init_server(unsigned int port, const char *db_conn_info,
   s->transport.sin_addr.s_addr = htonl(INADDR_ANY);
   s->transport.sin_port = htons(port);
 
+  // Initialization of the variables for contingency management
+  if (pthread_mutex_init(&(s->mx), NULL) != 0) {
+    log_error("[%s] (%s) Could not initializate the mutex! Cause: %s\n", 
+              __FILE_NAME__, __func__, strerror(errno));
+    perror("pthread_mutex_init: ");
+		free(s);
+    return NULL;
+  }
+  s->max_clients = max_clients;
+  s->clients_on = 0;
+
   /** Socket Binding
   The INADDR_ANY binding does not generate a random IP address
   It maps the socket to all available interfaces (which on a server for obvious
@@ -203,7 +214,9 @@ void destroy_server(server_t *s) {
   log_info("[%s] (%s) Destroying server->db\n", __FILE_NAME__, __func__);
   destroy_db(s->db);
   
+  pthread_mutex_destroy(&(s->mx));
   free(s);
+
   log_info("[%s] (%s) Goodbye!\n", __FILE_NAME__, __func__);
 }
 
@@ -223,9 +236,20 @@ void server_loop(server_t *s) {
     ssize_t sd = accept(
                s->socket, (struct sockaddr *)&s->transport, &len);
     if (sd != -1) {
-      log_info("[%s] (%s) Client connected on socket n°%d\n", __FILE_NAME__,
-                 __func__, sd);
-      enqueue(s->queue, (void *)sd);
+      pthread_mutex_lock(&(s->mx));
+      if (s->clients_on < s->max_clients) {
+        s->clients_on++;
+        pthread_mutex_unlock(&(s->mx));
+        log_info("[%s] (%s) Client connected on socket n°%d\n", 
+                 __FILE_NAME__, __func__, sd);
+        enqueue(s->queue, (void *)sd);
+      }
+      else {
+        pthread_mutex_unlock(&(s->mx));
+        log_info("[%s] (%s) Client connection refused. Closing socket n°%d\n", 
+                 __FILE_NAME__, __func__, sd);
+        close(sd);
+      }
     }
   }
 }
@@ -291,6 +315,9 @@ void *connection_handler(void *sd) {
     } 
   }
 
+  pthread_mutex_lock(&(((server_t *)sd)->mx));
+  ((server_t *)sd)->clients_on--;
+  pthread_mutex_unlock(&(((server_t *)sd)->mx));
   log_info("[%s] (%s) Socket n°%d exit from the shop\n",
                   __FILE_NAME__, __func__, socket);
   return NULL;

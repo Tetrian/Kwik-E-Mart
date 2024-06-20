@@ -15,6 +15,9 @@
 typedef struct server_t {
 	ssize_t socket;
 	struct sockaddr_in transport;
+	pthread_mutex_t mx;
+	size_t max_clients;
+	size_t clients_on;
 	db_t *db;
 	pthread_t *workers;
 	size_t max_workers;

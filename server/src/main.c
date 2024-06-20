@@ -13,7 +13,7 @@
 #include "server.h"
 
 // number of customers that can making purchases
-#define MAX_CUSTOMERS 1
+#define MAX_CUSTOMERS 10
 
 // number of cashiers
 #define MAX_CASHIER 3
