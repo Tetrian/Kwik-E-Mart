@@ -142,6 +142,37 @@ void insert(db_t *db, const char *cmd, const int id,
 }
 
 /*
+ * parse the receipt and insert it into database
+ * @param db database struct
+ * @param total string that contain the price
+ * @param splitter separator of field
+ */
+void insert_receipt(db_t *db, const char *total) {  
+  // set the new id
+  int id = get_last_id(db, "receipt") + 1;
+  char cid[ENOUGHT];
+  sprintf(cid, "%d", id);
+  
+  // get time
+  char time[] = "TODO:TIMES";
+
+  // Specific the values and lenghts of parameters
+  const char *const param_values[] = {cid, time, total};
+  const int param_lengths[] = {sizeof(cid), sizeof(time), sizeof(total)};
+
+  pthread_mutex_lock(&(db->mutex));
+  PGresult *res = PQexecParams(db->conn, INSERT_RECEIPT, N_PARAMS,
+                      NULL, param_values, param_lengths, 
+                      NULL, TEXT_FORMAT
+  );
+	if (PQresultStatus(res) != PGRES_COMMAND_OK)
+		log_error("[%s] (%s) INSERT failed: %s\n",__FILE_NAME__,
+              __func__, PQerrorMessage(db->conn));
+	PQclear(res);
+  pthread_mutex_unlock(&(db->mutex));
+}
+
+/*
  * get name and price of all products in the format
  * name€price$
  * @param db database struct

@@ -297,16 +297,21 @@ void *connection_handler(void *sd) {
           log_debug("[%s] (%s) Socket n°%d receipt {%s}\n",
                   __FILE_NAME__, __func__, socket, receipt);
           
-          size_t n_products = (size_t)strtol(receipt, NULL, 10);
+          char *price;
+          size_t n_products = (size_t)strtol(receipt, &price, 10);
+
           if (n_products > 0) {
             log_info("[%s] (%s) Socket n°%d is in queue for checkout\n",
                   __FILE_NAME__, __func__, socket);
             int delay = enter_checkout(s->checkouts[socket%s->max_checkouts]);
             log_debug("[%s] (%s) Socket n°%d need to wait %ds to pay.\n",
-                  __FILE_NAME__, __func__, socket, delay);
+                  __FILE_NAME__, __func__, socket, delay + n_products);
             sleep(delay + n_products);
             leave_checkout(s->checkouts[socket%s->max_checkouts]);
-            //TODO: add receipt to db
+            
+            pthread_mutex_lock(&(((server_t *)sd)->mx));
+            insert_receipt(((server_t *)sd)->db, price + 1);
+            pthread_mutex_unlock(&(((server_t *)sd)->mx));
           }
           write_msg(socket, SO, NULL);
           flag = false;

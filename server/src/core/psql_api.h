@@ -60,6 +60,8 @@ void populate_product_tbl(db_t *);
 
 void insert(db_t *, const char *, const int, const char *, const float);
 
+void insert_receipt(db_t *, const char *);
+
 int get_all_products(db_t *, char *);
 
 int get_last_id(db_t*, const char *);
