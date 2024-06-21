@@ -276,7 +276,7 @@ void *connection_handler(void *sd) {
     if (readed_bytes == -1) {
       log_error("[%s] (%s) Socket n°%d is broken. End communication.\n",
                 __FILE_NAME__, __func__, socket);
-      break;
+      return NULL;
     }
 
     // handle the request
@@ -285,7 +285,11 @@ void *connection_handler(void *sd) {
       //         __FILE_NAME__, __func__, socket, request[CMD_POS]);
       switch (request[CMD_POS]) {
         case BEL:
-          write_msg(socket, BEL, s->products);
+          if (write_msg(socket, BEL, s->products) == -1) {
+            log_error("[%s] (%s) Socket n°%d is broken. End communication.\n",
+                      __FILE_NAME__, __func__, socket);
+            return NULL;
+          }
           log_info("[%s] (%s) Socket n°%d is inside the market\n",
                   __FILE_NAME__, __func__, socket);
           break;
@@ -306,14 +310,18 @@ void *connection_handler(void *sd) {
             int delay = enter_checkout(s->checkouts[socket%s->max_checkouts]);
             log_debug("[%s] (%s) Socket n°%d need to wait %ds to pay.\n",
                   __FILE_NAME__, __func__, socket, delay + n_products);
-            sleep(delay + n_products);
+            sleep(delay + (int)(n_products/2));
             leave_checkout(s->checkouts[socket%s->max_checkouts]);
             
             pthread_mutex_lock(&(((server_t *)sd)->mx));
             insert_receipt(((server_t *)sd)->db, price + 1);
             pthread_mutex_unlock(&(((server_t *)sd)->mx));
           }
-          write_msg(socket, SO, NULL);
+          if (write_msg(socket, SO, NULL) == -1) {
+            log_error("[%s] (%s) Socket n°%d is broken. End communication.\n",
+                      __FILE_NAME__, __func__, socket);
+            return NULL;
+          }
           flag = false;
           break;
       }

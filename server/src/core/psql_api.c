@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <pthread.h>
+#include <time.h>
 
 #include "psql_api.h"
 #include "libpq-fe.h"
@@ -154,11 +155,14 @@ void insert_receipt(db_t *db, const char *total) {
   sprintf(cid, "%d", id);
   
   // get time
-  char time[] = "TODO:TIMES";
+  char date[ENOUGHT*ENOUGHT];
+  time_t now = time(NULL);
+  struct tm *t = localtime(&now);
+  strftime(date, sizeof(date)-1, "%d/%m/%Y %H:%M", t);
 
   // Specific the values and lenghts of parameters
-  const char *const param_values[] = {cid, time, total};
-  const int param_lengths[] = {sizeof(cid), sizeof(time), sizeof(total)};
+  const char *const param_values[] = {cid, date, total};
+  const int param_lengths[] = {sizeof(cid), sizeof(date), sizeof(total)};
 
   pthread_mutex_lock(&(db->mutex));
   PGresult *res = PQexecParams(db->conn, INSERT_RECEIPT, N_PARAMS,
