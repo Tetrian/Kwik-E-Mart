@@ -237,8 +237,12 @@ void server_loop(server_t *s) {
                s->socket, (struct sockaddr *)&s->transport, &len);
     if (sd != -1) {
       pthread_mutex_lock(&(s->mx));
+      log_debug("[%s] (%s) Client on = %d\n", 
+                 __FILE_NAME__, __func__, s->clients_on);
       if (s->clients_on < s->max_clients) {
         s->clients_on++;
+        log_debug("[%s] (%s) Client on = %d\n", 
+                 __FILE_NAME__, __func__, s->clients_on);
         pthread_mutex_unlock(&(s->mx));
         log_info("[%s] (%s) Client connected on socket n°%d\n", 
                  __FILE_NAME__, __func__, sd);
@@ -269,13 +273,16 @@ void *connection_handler(void *sd) {
 
   bool flag = true;
   while (_keep_alive && flag) {
-    uint8_t request[BUFFSIZE];
+    uint8_t request[BUFFSIZE] = {0};
     ssize_t readed_bytes = read(socket, request, BUFFSIZE);
       //log_debug("[%s] (%s) Socket n°%d write %d bytes.\n",
       //         __FILE_NAME__, __func__, socket, readed_bytes);
     if (readed_bytes == -1) {
       log_error("[%s] (%s) Socket n°%d is broken. End communication.\n",
                 __FILE_NAME__, __func__, socket);
+      pthread_mutex_lock(&(((server_t *)sd)->mx));
+      ((server_t *)sd)->clients_on--;
+      pthread_mutex_unlock(&(((server_t *)sd)->mx));
       return NULL;
     }
 
@@ -288,6 +295,9 @@ void *connection_handler(void *sd) {
           if (write_msg(socket, BEL, s->products) == -1) {
             log_error("[%s] (%s) Socket n°%d is broken. End communication.\n",
                       __FILE_NAME__, __func__, socket);
+            pthread_mutex_lock(&(((server_t *)sd)->mx));
+            ((server_t *)sd)->clients_on--;
+            pthread_mutex_unlock(&(((server_t *)sd)->mx));
             return NULL;
           }
           log_info("[%s] (%s) Socket n°%d is inside the market\n",
@@ -320,6 +330,9 @@ void *connection_handler(void *sd) {
           if (write_msg(socket, SO, NULL) == -1) {
             log_error("[%s] (%s) Socket n°%d is broken. End communication.\n",
                       __FILE_NAME__, __func__, socket);
+            pthread_mutex_lock(&(((server_t *)sd)->mx));
+            ((server_t *)sd)->clients_on--;
+            pthread_mutex_unlock(&(((server_t *)sd)->mx));
             return NULL;
           }
           flag = false;
