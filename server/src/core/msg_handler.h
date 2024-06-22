@@ -9,10 +9,12 @@
 
 // ASCII control characters
 #define SOH 1
+#define ACK 6
 #define BEL 7
 #define CR  13
 #define SO  14
 #define SI  15
+#define NAK 21
 
 // Buffer max size
 #define BUFFSIZE 250

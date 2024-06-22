@@ -237,20 +237,25 @@ void server_loop(server_t *s) {
                s->socket, (struct sockaddr *)&s->transport, &len);
     if (sd != -1) {
       pthread_mutex_lock(&(s->mx));
-                 __FILE_NAME__, __func__, s->clients_on);
       if (s->clients_on < s->max_clients) {
         s->clients_on++;
-                 __FILE_NAME__, __func__, s->clients_on);
         pthread_mutex_unlock(&(s->mx));
         log_info("[%s] (%s) Client connected on socket n°%d\n", 
                  __FILE_NAME__, __func__, sd);
+        if (write_msg(sd, ACK, NULL) == -1) {
+          log_error("[%s] (%s) Socket n°%d is broken. End communication.\n",
+                      __FILE_NAME__, __func__, sd);
+        }
         enqueue(s->queue, (void *)sd);
       }
       else {
         pthread_mutex_unlock(&(s->mx));
-        log_info("[%s] (%s) Client connection refused. Closing socket n°%d\n", 
+        if (write_msg(sd, NAK, NULL) == -1) {
+          log_error("[%s] (%s) Socket n°%d is broken. End communication.\n",
+                      __FILE_NAME__, __func__, sd);
+        }
+        log_info("[%s] (%s) Connection on socket n°%d refused.\n", 
                  __FILE_NAME__, __func__, sd);
-        close(sd);
       }
     }
   }

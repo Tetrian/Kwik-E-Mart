@@ -1,10 +1,12 @@
 
 # ASCII control characters
 SOH = 1
+ACK = 6
 BEL = 7
 CR  = 13
 SO  = 14
 SI  = 15
+NAK = 21
 
 # Buffer max size
 BUFFSIZE = 250

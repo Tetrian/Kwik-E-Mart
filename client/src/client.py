@@ -19,6 +19,8 @@ class Client():
         except sk.error as err:
             logger.error(f"Socket error! Cause {err}")
             raise ValueError("can't connect client to server")
+        if (self.socket.recv(pl.BUFFSIZE)[1] != pl.ACK):
+            raise ValueError("Server is full, retry later.")
         logger.info('Client Ready!')
     
     # write a message to the socket
