@@ -2,6 +2,7 @@
 from kivy.uix.boxlayout import BoxLayout
 from kivy.lang.builder import Builder
 
+# construction of product's widget 
 Builder.load_string('''
 <Product>:
     orientation: 'vertical'
@@ -36,6 +37,7 @@ Builder.load_string('''
 ''')
 
 
+# Management of the widget
 class Product(BoxLayout):
     def __init__(self, name='ProductName', price=0.0, source='', **kwargs):
         super(Product, self).__init__(**kwargs)

@@ -38,7 +38,7 @@ void destroy_checkout(checkout_t *c) {
   }
 }
 
-
+// lock the mutex and get the service time of checkout
 int enter_checkout(checkout_t *c) {
   if (c == NULL)
     return -1;
@@ -47,6 +47,7 @@ int enter_checkout(checkout_t *c) {
   return c->service_time;
 }
 
+// release the mutex
 void leave_checkout(checkout_t *c) {
   if (c != NULL) {
     pthread_mutex_unlock(&(c->mx));

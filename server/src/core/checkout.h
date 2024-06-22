@@ -24,10 +24,8 @@ checkout_t *init_checkout();
 
 void destroy_checkout(checkout_t *);
 
-// lock the mutex and get the service time of checkout
 int enter_checkout(checkout_t *);
 
-// release the mutex
 void leave_checkout(checkout_t *);
 
 /* ************************************************************************** */

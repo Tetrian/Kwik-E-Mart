@@ -237,11 +237,9 @@ void server_loop(server_t *s) {
                s->socket, (struct sockaddr *)&s->transport, &len);
     if (sd != -1) {
       pthread_mutex_lock(&(s->mx));
-      log_debug("[%s] (%s) Client on = %d\n", 
                  __FILE_NAME__, __func__, s->clients_on);
       if (s->clients_on < s->max_clients) {
         s->clients_on++;
-        log_debug("[%s] (%s) Client on = %d\n", 
                  __FILE_NAME__, __func__, s->clients_on);
         pthread_mutex_unlock(&(s->mx));
         log_info("[%s] (%s) Client connected on socket n°%d\n", 
@@ -258,11 +256,9 @@ void server_loop(server_t *s) {
   }
 }
 
-/*
- * Gestisce la comunicazione tra server e client
- */
+/** Handle server to client communication */
 void *connection_handler(void *sd) {
-  // Parsing del socket descriptor
+  // Parsing of the socket descriptor
   ssize_t socket = (ssize_t)dequeue(((server_t *)sd)->queue);
   if (!is_keep(((server_t *)sd)->queue)) return NULL;
 
@@ -271,12 +267,12 @@ void *connection_handler(void *sd) {
       __FILE_NAME__, __func__, socket);
   server_t *s = ((server_t *)sd);
 
+  // Start loop for message management
   bool flag = true;
   while (_keep_alive && flag) {
+    // read the request
     uint8_t request[BUFFSIZE] = {0};
     ssize_t readed_bytes = read(socket, request, BUFFSIZE);
-      //log_debug("[%s] (%s) Socket n°%d write %d bytes.\n",
-      //         __FILE_NAME__, __func__, socket, readed_bytes);
     if (readed_bytes == -1) {
       log_error("[%s] (%s) Socket n°%d is broken. End communication.\n",
                 __FILE_NAME__, __func__, socket);
@@ -288,10 +284,8 @@ void *connection_handler(void *sd) {
 
     // handle the request
     if (is_valid(request, readed_bytes)) {
-      //log_debug("[%s] (%s) Socket n°%d is handling {%d} command.\n",
-      //         __FILE_NAME__, __func__, socket, request[CMD_POS]);
       switch (request[CMD_POS]) {
-        case BEL:
+        case BEL: // allow permission for enter in the shop
           if (write_msg(socket, BEL, s->products) == -1) {
             log_error("[%s] (%s) Socket n°%d is broken. End communication.\n",
                       __FILE_NAME__, __func__, socket);
@@ -304,22 +298,20 @@ void *connection_handler(void *sd) {
                   __FILE_NAME__, __func__, socket);
           break;
         
-        case SI:
+        case SI: // received request for checkouts
           char receipt[readed_bytes - WRAPSIZE + 1];
           receipt[readed_bytes - WRAPSIZE] = '\0';
           parse_payload(request, receipt, readed_bytes);
-          log_debug("[%s] (%s) Socket n°%d receipt {%s}\n",
-                  __FILE_NAME__, __func__, socket, receipt);
           
           char *price;
           size_t n_products = (size_t)strtol(receipt, &price, 10);
 
+          // If there is a purchased, handle the checkout
           if (n_products > 0) {
             log_info("[%s] (%s) Socket n°%d is in queue for checkout\n",
                   __FILE_NAME__, __func__, socket);
             int delay = enter_checkout(s->checkouts[socket%s->max_checkouts]);
-            log_debug("[%s] (%s) Socket n°%d need to wait %ds to pay.\n",
-                  __FILE_NAME__, __func__, socket, delay + n_products);
+            
             sleep(delay + (int)(n_products/2));
             leave_checkout(s->checkouts[socket%s->max_checkouts]);
             
@@ -335,7 +327,8 @@ void *connection_handler(void *sd) {
             pthread_mutex_unlock(&(((server_t *)sd)->mx));
             return NULL;
           }
-          flag = false;
+
+          flag = false; // exit from the loop
           break;
       }
     } 

@@ -60,13 +60,11 @@ if __name__ == '__main__':
         exit()
 
     products = dict(parse(msg_products))
-    logger.debug(f'Products in the shop:\n\t{products}')
         
     n_products = randint(0, 10)
     total_price = round(uniform(10, 1000), 2)
     logger.info(f'Get in line for the checkout with {n_products} products')
     si_msg = str(n_products) + '$' + str(total_price)
-    logger.debug(f'SI args: "{si_msg}"')
     
     try:
         client.write_msg(pl.SI, si_msg)
@@ -79,5 +77,4 @@ if __name__ == '__main__':
         response = client.read_msg(pl.SO)
     except RuntimeError as err:
         logger.error(f'Exit cause: {err}')
-    logger.debug(response)
     logger.info('Client exit from store.')

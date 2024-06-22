@@ -58,7 +58,6 @@ class InsideScreen(Screen):
         app = App.get_running_app()
         if app.manager.current == 'inside':
             self.init_shelf(app)
-            #logger.debug(app.products)
             self.event.cancel()
 
     # add product to shelf
