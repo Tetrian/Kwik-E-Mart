@@ -263,87 +263,89 @@ void server_loop(server_t *s) {
 
 /** Handle server to client communication */
 void *connection_handler(void *sd) {
-  // Parsing of the socket descriptor
-  ssize_t socket = (ssize_t)dequeue(((server_t *)sd)->queue);
-  if (!is_keep(((server_t *)sd)->queue)) return NULL;
+  while (_keep_alive) {
+    // Parsing of the socket descriptor
+    ssize_t socket = (ssize_t)dequeue(((server_t *)sd)->queue);
+    if (!is_keep(((server_t *)sd)->queue)) return NULL;
 
-  log_info(
-      "[%s] (%s) Start communication with the client on socket n°%d.\n",
-      __FILE_NAME__, __func__, socket);
-  server_t *s = ((server_t *)sd);
+    log_info(
+        "[%s] (%s) Start communication with the client on socket n°%d.\n",
+        __FILE_NAME__, __func__, socket);
+    server_t *s = ((server_t *)sd);
 
-  // Start loop for message management
-  bool flag = true;
-  while (_keep_alive && flag) {
-    // read the request
-    uint8_t request[BUFFSIZE] = {0};
-    ssize_t readed_bytes = read(socket, request, BUFFSIZE);
-    if (readed_bytes == -1) {
-      log_error("[%s] (%s) Socket n°%d is broken. End communication.\n",
-                __FILE_NAME__, __func__, socket);
-      pthread_mutex_lock(&(((server_t *)sd)->mx));
-      ((server_t *)sd)->clients_on--;
-      pthread_mutex_unlock(&(((server_t *)sd)->mx));
-      return NULL;
+    // Start loop for message management
+    bool flag = true;
+    while (_keep_alive && flag) {
+      // read the request
+      uint8_t request[BUFFSIZE] = {0};
+      ssize_t readed_bytes = read(socket, request, BUFFSIZE);
+      if (readed_bytes == -1) {
+        log_error("[%s] (%s) Socket n°%d is broken. End communication.\n",
+                  __FILE_NAME__, __func__, socket);
+        pthread_mutex_lock(&(((server_t *)sd)->mx));
+        ((server_t *)sd)->clients_on--;
+        pthread_mutex_unlock(&(((server_t *)sd)->mx));
+        return NULL;
+      }
+
+      // handle the request
+      if (is_valid(request, readed_bytes)) {
+        switch (request[CMD_POS]) {
+          case BEL: // allow permission for enter in the shop
+            if (write_msg(socket, BEL, s->products) == -1) {
+              log_error("[%s] (%s) Socket n°%d is broken. End communication.\n",
+                        __FILE_NAME__, __func__, socket);
+              pthread_mutex_lock(&(((server_t *)sd)->mx));
+              ((server_t *)sd)->clients_on--;
+              pthread_mutex_unlock(&(((server_t *)sd)->mx));
+              return NULL;
+            }
+            log_info("[%s] (%s) Socket n°%d is inside the market\n",
+                    __FILE_NAME__, __func__, socket);
+            break;
+          
+          case SI: // received request for checkouts
+            char receipt[readed_bytes - WRAPSIZE + 1];
+            receipt[readed_bytes - WRAPSIZE] = '\0';
+            parse_payload(request, receipt, readed_bytes);
+            
+            char *price;
+            size_t n_products = (size_t)strtol(receipt, &price, 10);
+
+            // If there is a purchased, handle the checkout
+            if (n_products > 0) {
+              log_info("[%s] (%s) Socket n°%d is in queue for checkout\n",
+                    __FILE_NAME__, __func__, socket);
+              int delay = enter_checkout(s->checkouts[socket%s->max_checkouts]);
+              
+              sleep(delay + (int)(n_products/2));
+              leave_checkout(s->checkouts[socket%s->max_checkouts]);
+              
+              pthread_mutex_lock(&(((server_t *)sd)->mx));
+              insert_receipt(((server_t *)sd)->db, price + 1);
+              pthread_mutex_unlock(&(((server_t *)sd)->mx));
+            }
+            if (write_msg(socket, SO, NULL) == -1) {
+              log_error("[%s] (%s) Socket n°%d is broken. End communication.\n",
+                        __FILE_NAME__, __func__, socket);
+              pthread_mutex_lock(&(((server_t *)sd)->mx));
+              ((server_t *)sd)->clients_on--;
+              pthread_mutex_unlock(&(((server_t *)sd)->mx));
+              return NULL;
+            }
+
+            flag = false; // exit from the loop
+            break;
+        }
+      } 
     }
 
-    // handle the request
-    if (is_valid(request, readed_bytes)) {
-      switch (request[CMD_POS]) {
-        case BEL: // allow permission for enter in the shop
-          if (write_msg(socket, BEL, s->products) == -1) {
-            log_error("[%s] (%s) Socket n°%d is broken. End communication.\n",
-                      __FILE_NAME__, __func__, socket);
-            pthread_mutex_lock(&(((server_t *)sd)->mx));
-            ((server_t *)sd)->clients_on--;
-            pthread_mutex_unlock(&(((server_t *)sd)->mx));
-            return NULL;
-          }
-          log_info("[%s] (%s) Socket n°%d is inside the market\n",
-                  __FILE_NAME__, __func__, socket);
-          break;
-        
-        case SI: // received request for checkouts
-          char receipt[readed_bytes - WRAPSIZE + 1];
-          receipt[readed_bytes - WRAPSIZE] = '\0';
-          parse_payload(request, receipt, readed_bytes);
-          
-          char *price;
-          size_t n_products = (size_t)strtol(receipt, &price, 10);
-
-          // If there is a purchased, handle the checkout
-          if (n_products > 0) {
-            log_info("[%s] (%s) Socket n°%d is in queue for checkout\n",
-                  __FILE_NAME__, __func__, socket);
-            int delay = enter_checkout(s->checkouts[socket%s->max_checkouts]);
-            
-            sleep(delay + (int)(n_products/2));
-            leave_checkout(s->checkouts[socket%s->max_checkouts]);
-            
-            pthread_mutex_lock(&(((server_t *)sd)->mx));
-            insert_receipt(((server_t *)sd)->db, price + 1);
-            pthread_mutex_unlock(&(((server_t *)sd)->mx));
-          }
-          if (write_msg(socket, SO, NULL) == -1) {
-            log_error("[%s] (%s) Socket n°%d is broken. End communication.\n",
-                      __FILE_NAME__, __func__, socket);
-            pthread_mutex_lock(&(((server_t *)sd)->mx));
-            ((server_t *)sd)->clients_on--;
-            pthread_mutex_unlock(&(((server_t *)sd)->mx));
-            return NULL;
-          }
-
-          flag = false; // exit from the loop
-          break;
-      }
-    } 
+    pthread_mutex_lock(&(((server_t *)sd)->mx));
+    ((server_t *)sd)->clients_on--;
+    pthread_mutex_unlock(&(((server_t *)sd)->mx));
+    log_info("[%s] (%s) Socket n°%d exit from the shop\n",
+                    __FILE_NAME__, __func__, socket);
   }
-
-  pthread_mutex_lock(&(((server_t *)sd)->mx));
-  ((server_t *)sd)->clients_on--;
-  pthread_mutex_unlock(&(((server_t *)sd)->mx));
-  log_info("[%s] (%s) Socket n°%d exit from the shop\n",
-                  __FILE_NAME__, __func__, socket);
   return NULL;
 }
 
