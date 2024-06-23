@@ -11,7 +11,7 @@ bin/server
 ### Client
 Nella directory *client/src* eseguire:
 ```console
-# Per eseguire il client in GUI
+# Per eseguire il client GUI
 python3 main.py
 # Per eseguire un client automatizzato
 python3 client.py
