@@ -4,8 +4,6 @@
 #include <pthread.h>
 #include <sys/types.h>
 
-#include "../helper/ts_queue.h"
-
 /* ************************************************************************** */
 
 #define MIN_TIME 1

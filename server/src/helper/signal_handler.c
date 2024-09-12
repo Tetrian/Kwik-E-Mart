@@ -10,8 +10,9 @@
 #include "../core/config.h"
 
 /*
+ * Setup a signal handler
  * @param int sig signal number
- * @param void (func)(int) the "real" function that handler the signal
+ * @param void(func)(int) the "real" function that handler the signal
  * The sigaction() system call is used to change the action taken by a process
  * on receipt of a specific signal (except SIGKILL and SIGSTOP)
  */

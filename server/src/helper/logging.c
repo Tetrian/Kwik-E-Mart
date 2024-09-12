@@ -19,7 +19,7 @@ void log_format(const char* tag, const char* message, va_list args) {
 // Print a message in an error format
 void log_error(const char* message, ...) {
   va_list args; // accept a variable number of arguments
-  va_start(args, message); // initialize the list to poin at first argument
+  va_start(args, message); // initialize the list to point at first argument
   log_format(ANSI_COLOR_RED "error " ANSI_COLOR_RESET, message, args);
   va_end(args); // clean the list
 }

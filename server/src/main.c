@@ -1,15 +1,5 @@
 
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <pthread.h>
-#include <stdio.h>
-#include <string.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <unistd.h>
-
 #include "./core/config.h"
-#include "./helper/logging.h"
 #include "server.h"
 
 // number of customers that can making purchases

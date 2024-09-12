@@ -146,7 +146,6 @@ void insert(db_t *db, const char *cmd, const int id,
  * parse the receipt and insert it into database
  * @param db database struct
  * @param total string that contain the price
- * @param splitter separator of field
  */
 void insert_receipt(db_t *db, const char *total) {  
   // set the new id
@@ -214,8 +213,8 @@ int get_last_id(db_t* db, const char *table_name) {
   PGresult *res = PQexec(db->conn, cmd);
   pthread_mutex_unlock(&(db->mutex));
 
-  int nid = strtol(PQgetvalue(res, 0, 0), NULL, 10);
+  int nids = strtol(PQgetvalue(res, 0, 0), NULL, 10);
   PQclear(res);
   
-  return nid;
+  return nids;
 }

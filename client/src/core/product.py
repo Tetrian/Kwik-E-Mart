@@ -54,7 +54,7 @@ class Product(BoxLayout):
             screen.cart.append((self.name, self.price))
 
 
-# Test
+# Test. Note: didn't work with on_touch_down implementation
 if __name__ == '__main__':
     from kivy.app import App
 

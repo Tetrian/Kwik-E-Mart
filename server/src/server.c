@@ -23,7 +23,7 @@ static void handle_interrupt(int signal);
 
 server_t *init_server(unsigned int port, const char *db_conn_info,
                       const size_t max_clients, const size_t max_workers,
-                      const size_t max_job,void *(*routine)(void *)) {
+                      const size_t max_jobs, void *(*routine)(void *)) {
   server_t *s = malloc(sizeof(struct server_t));
   if (s == NULL) {
     log_error("[%s] (%s) Failed to allocate space for the server\n",
@@ -153,7 +153,7 @@ server_t *init_server(unsigned int port, const char *db_conn_info,
   }
 
   //Initialization of the supermarket checkouts
-  if ((s->checkouts = malloc(sizeof(checkout_t[max_job]))) == NULL) {
+  if ((s->checkouts = malloc(sizeof(checkout_t[max_jobs]))) == NULL) {
     log_error("[%s] (%s) Failed to allocate enough space for the "
               "server->checkouts! Cause: %s\n",
               __FILE_NAME__, __func__, strerror(errno));
@@ -161,8 +161,8 @@ server_t *init_server(unsigned int port, const char *db_conn_info,
     return NULL;
   }
   
-  s->max_checkouts = max_job;
-  for (size_t i = 0; i < max_job; i++) {
+  s->max_checkouts = max_jobs;
+  for (size_t i = 0; i < max_jobs; i++) {
     s->checkouts[i] = init_checkout();
     if (s->checkouts[i] == NULL) {
       log_error("[%s] (%s) Failed to init checkout n° %zu!\n",
